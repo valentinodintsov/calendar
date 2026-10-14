@@ -1,0 +1,24 @@
+# В образ не попадают секреты, данные и всё, что не нужно для работы приложения
+.env
+.env.*
+!.env.example
+main/local_settings.py
+db.sqlite3
+db.sqlite3-journal
+*.sqlite3
+media/
+data/
+staticfiles/
+**/__pycache__/
+*.py[cod]
+*.log
+*.pem
+*.key
+.git
+.idea
+.venv
+venv
+*.pdf
+Dockerfile
+docker-compose.yml
+.dockerignore

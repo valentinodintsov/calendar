@@ -1,0 +1,65 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Виртуальные окружения
+venv/
+.venv/
+env/
+ENV/
+
+# Сборка / пакеты
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ===== Django =====
+# Локальная база данных (содержит пользователей, события, токены интеграций)
+db.sqlite3
+db.sqlite3-journal
+*.sqlite3
+
+# Загруженные пользователями файлы (вложения событий)
+media/
+
+# Собранная статика (python manage.py collectstatic)
+staticfiles/
+
+# Логи
+*.log
+logs/
+
+# Локальные настройки, если появятся
+local_settings.py
+settings_local.py
+
+# ===== Секреты и переменные окружения =====
+# GOOGLE_OAUTH_*, INTEGRATIONS_ENCRYPTION_KEY, EMAIL_HOST_PASSWORD и т.п.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ===== Тесты и покрытие =====
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# ===== IDE =====
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ===== Системные файлы =====
+.DS_Store
+Thumbs.db
+desktop.ini

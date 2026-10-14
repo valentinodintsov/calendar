@@ -1,0 +1,4 @@
+# Зависимости образа Docker: приложение + сервер приложений и раздача статики
+-r requirements.txt
+gunicorn>=23.0
+whitenoise>=6.7

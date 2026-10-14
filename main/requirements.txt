@@ -1,0 +1,7 @@
+Django>=5.2,<5.3
+requests>=2.31
+cryptography>=42
+tzdata>=2024.1  # часовые пояса для zoneinfo (нужно на Windows)
+ldap3>=2.9  # Active Directory / LDAP (адресная книга)
+requests_ntlm>=1.3  # вход NTLM в Microsoft Exchange (EWS)
+python-dotenv>=1.0  # переменные окружения из файла .env

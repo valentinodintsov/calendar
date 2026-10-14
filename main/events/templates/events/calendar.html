@@ -1,0 +1,382 @@
+{% load static %}<!doctype html>
+<html lang="ru"{% if me.settings.theme != "system" %} data-theme="{{ me.settings.theme }}"{% endif %}>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Календарь</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'events/calendar.css' %}?v={{ static_version }}">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="title-group">
+        <h1 id="month-title" class="month-title" aria-live="polite"></h1>
+        <span id="year-title" class="year-title"></span>
+      </div>
+      <div class="toolbar">
+        <div class="search">
+          <input id="search" type="search" placeholder="Поиск событий" autocomplete="off" aria-label="Поиск событий"
+                 role="combobox" aria-expanded="false" aria-controls="search-results" aria-autocomplete="list"
+                 title="↑/↓ — выбрать, Enter — открыть, Esc — закрыть">
+          <div id="search-results" class="search-results" role="listbox" aria-label="Найденные события" hidden></div>
+        </div>
+        <div class="nav">
+          <button class="btn icon" id="prev" title="Предыдущий месяц (←)" aria-label="Предыдущий месяц">‹</button>
+          <label class="view-select" title="Вид календаря: M — месяц, W — неделя, D — день">
+            <span class="sr">Вид календаря</span>
+            <select id="view-select" class="btn">
+              <option value="month">Месяц</option>
+              <option value="week">Неделя</option>
+              <option value="day">День</option>
+            </select>
+          </label>
+          <button class="btn icon" id="next" title="Следующий месяц (→)" aria-label="Следующий месяц">›</button>
+        </div>
+        <button class="btn primary" id="new-event" title="Новое событие (N)"{% if not me.can_create %} hidden{% endif %}>+ Событие</button>
+        <div class="user-box">
+          <span class="user-name" title="{{ me.name }}">{{ me.name }}</span>
+          {% for role in me.roles %}<span class="role-badge role-{{ role.code }}">{{ role.label }}</span>{% endfor %}
+          <button class="btn" id="contacts-btn" title="Адресная книга организации">Контакты</button>
+          <button class="btn gear" id="settings-btn" type="button" title="Настройки: доступ, интеграции, отчет, оформление" aria-label="Настройки" aria-haspopup="dialog">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/>
+              <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.1-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 8.96 4.6H9a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15.04 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.04A1.7 1.7 0 0 0 20.96 10H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15Z"/>
+            </svg>
+          </button>
+          <form method="post" action="{% url 'logout' %}" class="logout">
+            {% csrf_token %}
+            <button type="submit" class="btn">Выйти</button>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="month" id="cal" aria-label="Календарь">
+        <div id="month-view" class="month-view">
+          <div class="weekdays">
+            <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div class="we">Сб</div><div class="we">Вс</div>
+          </div>
+          <div id="grid" class="grid" role="grid"></div>
+        </div>
+        <div id="time-view" class="time-view" hidden></div>
+      </section>
+
+      <aside class="day-panel" aria-label="События дня">
+        <div class="day-panel-head">
+          <div>
+            <div id="day-weekday" class="day-weekday"></div>
+            <div id="day-date" class="day-date"></div>
+          </div>
+          <button class="btn small" id="add-to-day"{% if not me.can_create %} hidden{% endif %}>+ Добавить</button>
+        </div>
+        <ul id="day-events" class="day-events"></ul>
+        <p class="hint">Двойной клик по дню или часу — новое событие.<br>Событие можно перетащить на другой день или время.</p>
+      </aside>
+    </main>
+    <footer class="page-footer">© Валентин Одинцов, 2026</footer>
+  </div>
+
+  <dialog id="event-dialog" class="dialog">
+    <form id="event-form" method="dialog" novalidate>
+      <h2 id="dialog-title">Новое событие</h2>
+      <input type="hidden" name="id">
+      <p class="owner-line" id="owner-line" hidden></p>
+      <p class="readonly-note" id="readonly-note" hidden>🔒 Только чтение — у вас нет права изменять это событие.</p>
+
+      <fieldset class="form-fields" id="form-fields">
+      <div class="field" id="owner-field" hidden>
+        <span>Календарь владельца</span>
+        <select name="owner" id="owner-select"></select>
+        <small class="error" data-for="owner"></small>
+      </div>
+
+      <label class="field">
+        <span>Тема</span>
+        <input name="title" required maxlength="200" placeholder="Например, встреча с командой">
+        <small class="error" data-for="title"></small>
+      </label>
+
+      <label class="check">
+        <input type="checkbox" name="all_day"> Весь день
+      </label>
+
+      <div class="row">
+        <label class="field">
+          <span>Начало</span>
+          <div class="dt">
+            <input type="date" name="start_date" required>
+            <input type="time" name="start_time" class="time" step="300">
+          </div>
+          <small class="error" data-for="start"></small>
+        </label>
+        <label class="field">
+          <span>Окончание</span>
+          <div class="dt">
+            <input type="date" name="end_date" required>
+            <input type="time" name="end_time" class="time" step="300">
+          </div>
+          <small class="error" data-for="end"></small>
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Где</span>
+        <input name="location" maxlength="200" placeholder="Необязательно">
+      </label>
+
+      <div class="field">
+        <span id="participants-label">Участники</span>
+        <div class="multiselect" id="participants">
+          <div class="ms-box">
+            <ul class="ms-chips" id="participant-chips" aria-label="Выбранные участники"></ul>
+            <input id="participant-input" type="text" autocomplete="off" role="combobox"
+                   aria-labelledby="participants-label" aria-expanded="false" aria-controls="participant-suggest"
+                   aria-autocomplete="list" placeholder="Фамилия, имя или e-mail из адресной книги">
+          </div>
+          <ul class="ms-options" id="participant-suggest" role="listbox" hidden></ul>
+        </div>
+        <input type="hidden" name="guest_emails">
+        <input type="hidden" name="url">
+        <small class="note dir-note" id="dir-guests-note" hidden></small>
+        <small class="error" data-for="guest_emails"></small>
+        <small class="error" data-for="invitees"></small>
+      </div>
+
+      <label class="field">
+        <span>Напоминание</span>
+        <select name="reminder_minutes" id="reminder-select">
+          <option value="">Нет</option>
+          {% for value, label in reminder_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+
+      <label class="check">
+        <input type="checkbox" name="notify"> Отправить приглашения по e-mail участникам
+      </label>
+
+      <fieldset class="field colors">
+        <legend>Цвет</legend>
+        {% for value, label in colors %}
+        <label class="swatch" title="{{ label }}">
+          <input type="radio" name="color" value="{{ value }}"{% if forloop.first %} checked{% endif %}>
+          <span class="dot c-{{ value }}"></span>
+          <span class="sr">{{ label }}</span>
+        </label>
+        {% endfor %}
+      </fieldset>
+
+      <label class="field">
+        <span>Описание</span>
+        <textarea name="description" rows="3" placeholder="Необязательно"></textarea>
+      </label>
+
+      <div class="field">
+        <span>Файлы</span>
+        <label class="dropzone" id="dropzone">
+          <input type="file" id="file-input" multiple>
+          <span><b>Выберите файлы</b> или перетащите сюда</span>
+          <small>до {{ max_upload_mb }} МБ каждый</small>
+        </label>
+        <ul class="files" id="file-list"></ul>
+        <small class="error" data-for="files"></small>
+      </div>
+      </fieldset>
+
+      <small class="error" data-for="__all__"></small>
+
+      <div class="actions">
+        <button type="button" class="btn danger" id="delete-event" hidden>Удалить</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn" id="cancel">Отмена</button>
+        <button type="submit" class="btn primary" id="save">Сохранить</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="access-dialog" class="dialog">
+    <form id="access-form" method="dialog">
+      <h2>Доступ к моим событиям</h2>
+      <p class="access-hint">Найдите сотрудника и отметьте, какие действия ему разрешены в вашем календаре — он станет его менеджером. «Изменение» включает «Чтение».</p>
+      <div class="access-search">
+        <input id="access-search" type="search" autocomplete="off" role="combobox"
+               aria-label="Поиск сотрудника" aria-expanded="false" aria-controls="access-suggest" aria-autocomplete="list"
+               placeholder="Фамилия, имя или e-mail сотрудника">
+        <ul id="access-suggest" class="ms-options access-suggest" role="listbox" hidden></ul>
+      </div>
+      <table class="access-table">
+        <thead>
+          <tr><th>Сотрудник</th><th title="Создавать новые события в вашем календаре">Запись</th><th title="Видеть события со всеми подробностями">Чтение</th><th title="Редактировать, переносить и удалять события">Изменение</th><th><span class="sr">Убрать</span></th></tr>
+        </thead>
+        <tbody id="access-rows"></tbody>
+      </table>
+      <small class="error" data-for="access"></small>
+      <div class="actions">
+        <span class="spacer"></span>
+        <button type="button" class="btn" id="access-cancel">Отмена</button>
+        <button type="submit" class="btn primary" id="access-save">Сохранить</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="settings-dialog" class="dialog" aria-labelledby="settings-title">
+    <form id="settings-form" method="dialog">
+      <h2 id="settings-title">Настройки</h2>
+      <p class="access-hint">Это ваши личные настройки: у каждого пользователя свои, действуют на любом компьютере, где вы вошли.</p>
+
+      {% if me.can_delegate %}
+      <fieldset class="settings-section">
+        <legend>Мой календарь</legend>
+        <div class="settings-cards">
+          <button type="button" class="settings-card" id="access-btn">
+            <span class="sc-title">Доступ</span>
+            <span class="sc-sub">Права менеджеров на ваши события: запись, чтение, изменение</span>
+          </button>
+          <button type="button" class="settings-card" id="integrations-btn">
+            <span class="sc-title">Интеграции</span>
+            <span class="sc-sub">Exchange, Google, Яндекс, Mail.ru, Рамблер и другие календари</span>
+          </button>
+        </div>
+      </fieldset>
+      {% endif %}
+
+      <fieldset class="settings-section">
+        <legend>Отчет по событиям</legend>
+        {# Кнопка — обычная отправка формы (GET), браузер сам скачивает файл: работает и без скрипта страницы #}
+        <div class="report-row">
+          <label class="field"><span>С</span><input type="date" id="report-start" name="start" required></label>
+          <label class="field"><span>По</span><input type="date" id="report-end" name="end" required></label>
+          <button type="submit" class="btn" id="report-btn" formmethod="get" formaction="{% url 'events:events-report' %}" title="Скачать «Отчет по событиям.docx» — все события календаря за выбранный период">Отчет</button>
+        </div>
+        <small class="error" id="report-error" hidden></small>
+      </fieldset>
+
+      <fieldset class="settings-section">
+        <legend>Оформление</legend>
+        <div class="seg" role="radiogroup" aria-label="Оформление">
+          <label><input type="radio" name="theme" value="system"><span>Как в системе</span></label>
+          <label><input type="radio" name="theme" value="light"><span>Светлое</span></label>
+          <label><input type="radio" name="theme" value="dark"><span>Тёмное</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="settings-section">
+        <legend>Вид при открытии календаря</legend>
+        <div class="seg" role="radiogroup" aria-label="Вид при открытии календаря">
+          <label><input type="radio" name="start_view" value="last"><span>Последний</span></label>
+          <label><input type="radio" name="start_view" value="month"><span>Месяц</span></label>
+          <label><input type="radio" name="start_view" value="week"><span>Неделя</span></label>
+          <label><input type="radio" name="start_view" value="day"><span>День</span></label>
+        </div>
+      </fieldset>
+
+      {% if me.can_manage_roles %}
+      <fieldset class="settings-section">
+        <legend>Администрирование</legend>
+        <div class="settings-links">
+          <a class="btn small" href="{% url 'admin:models_employee_employee_changelist' %}">Роли сотрудников</a>
+          <a class="btn small" href="{% url 'admin:directory_directorysource_changelist' %}">Адресная книга (AD / LDAP)</a>
+          <a class="btn small" href="{% url 'admin:integrations_mailserver_changelist' %}">Почтовый сервер</a>
+          <a class="btn small" href="{% url 'admin:integrations_externalcalendar_changelist' %}">Внешние календари</a>
+          <a class="btn small" href="{% url 'admin:index' %}">Вся админка</a>
+        </div>
+      </fieldset>
+      {% endif %}
+
+      <div class="actions">
+        <span class="spacer"></span>
+        <button type="submit" class="btn primary" id="settings-close" formnovalidate>Готово</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="integrations-dialog" class="dialog dialog-wide">
+    <div class="int-wrap">
+      <h2>Внешние календари</h2>
+      <p class="access-hint">Двусторонняя синхронизация событий вашего календаря с Google, Яндекс, Mail.ru, Рамблер и любым CalDAV-календарём.</p>
+      <ul id="int-list" class="int-list"></ul>
+      <div class="actions">
+        <button type="button" class="btn" id="int-sync-all">Синхронизировать всё</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn primary" id="int-add">+ Подключить календарь</button>
+      </div>
+
+      <form id="int-form" class="int-form" hidden novalidate>
+        <h3>Подключение</h3>
+        <label class="field">
+          <span>Сервис</span>
+          <select id="int-provider"></select>
+        </label>
+        <p id="int-help" class="note"></p>
+
+        <div id="int-google">
+          <a class="btn" id="int-google-btn" href="{% url 'integrations:google-connect' %}">Войти через Google</a>
+          <small id="int-google-na" class="note" hidden>Интеграция с Google не настроена: администратору нужно задать GOOGLE_OAUTH_CLIENT_ID и GOOGLE_OAUTH_CLIENT_SECRET.</small>
+        </div>
+
+        <div id="int-caldav" class="int-fields">
+          <label class="field"><span>Адрес сервера</span><input id="int-server" type="url" autocomplete="off"></label>
+          <label class="field"><span>Логин</span><input id="int-username" autocomplete="username"></label>
+          <label class="field"><span>Пароль приложения</span><input id="int-password" type="password" autocomplete="off"></label>
+          <button type="button" class="btn" id="int-discover">Найти календари</button>
+        </div>
+
+        <div id="int-found" hidden>
+          <div class="field">
+            <span>Какой календарь синхронизировать</span>
+            <ul id="int-cal-list" class="int-cal-list" role="radiogroup"></ul>
+          </div>
+          <div class="row">
+            <label class="field"><span>Направление</span><select id="int-direction"></select></label>
+            <label class="field"><span>Цвет его событий у нас</span><select id="int-color"></select></label>
+          </div>
+        </div>
+
+        <small class="error" data-for="int"></small>
+        <div class="actions">
+          <span class="spacer"></span>
+          <button type="button" class="btn" id="int-cancel">Отмена</button>
+          <button type="submit" class="btn primary" id="int-connect" disabled>Подключить</button>
+        </div>
+      </form>
+
+      <div class="actions">
+        <span class="spacer"></span>
+        <button type="button" class="btn" id="int-close">Закрыть</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="contacts-dialog" class="dialog dialog-wide">
+    <div class="int-wrap">
+      <h2>Адресная книга</h2>
+      <div class="access-search">
+        <input id="contacts-search" type="search" autocomplete="off" role="combobox" aria-expanded="true"
+               aria-controls="contacts-list" aria-autocomplete="list"
+               placeholder="ФИО, e-mail, телефон, должность или подразделение"
+               title="↑/↓ — выбрать, Enter — открыть карточку">
+      </div>
+      <p id="contacts-meta" class="note"></p>
+      <ul id="contacts-list" class="contacts-list" role="listbox" aria-label="Контакты"></ul>
+      <div id="contact-card" class="contact-card" hidden></div>
+      <div class="actions">
+        <span id="contacts-admin" hidden>
+          <a class="btn small" href="{% url 'admin:directory_directorysource_changelist' %}">Настроить каталоги</a>
+        </span>
+        <span class="spacer"></span>
+        <button type="button" class="btn" id="contacts-close">Закрыть</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  {{ users|json_script:"users-data" }}
+  {{ me|json_script:"me-data" }}
+  <script>window.CALENDAR_MAX_UPLOAD_MB = {{ max_upload_mb }};</script>
+  <script src="{% static 'events/calendar.js' %}?v={{ static_version }}"></script>
+</body>
+</html>

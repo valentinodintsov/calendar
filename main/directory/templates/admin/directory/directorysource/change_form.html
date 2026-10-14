@@ -1,0 +1,8 @@
+{% extends "admin/change_form.html" %}
+{% block submit_buttons_bottom %}
+{{ block.super }}
+<div class="submit-row">
+  <input type="submit" name="_test" value="Сохранить и проверить подключение">
+  <input type="submit" name="_search" value="Сохранить и проверить поиск">
+</div>
+{% endblock %}

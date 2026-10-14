@@ -1,0 +1,34 @@
+{% load static %}<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Вход — Календарь</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'events/calendar.css' %}">
+</head>
+<body class="login-page">
+  <main class="login-card">
+    <h1>Календарь</h1>
+    <p class="login-sub">Войдите с учётной записью домена{% if ad_domain %} {{ ad_domain }}{% endif %}</p>
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      {% if form.non_field_errors %}
+        <p class="error">{{ form.non_field_errors.0 }}</p>
+      {% endif %}
+      <label class="field">
+        <span>Имя пользователя</span>
+        <input name="username" autocomplete="username" required autofocus value="{{ form.username.value|default:'' }}">
+      </label>
+      <label class="field">
+        <span>Пароль</span>
+        <input type="password" name="password" autocomplete="current-password" required>
+      </label>
+      <button type="submit" class="btn primary">Войти</button>
+    </form>
+  </main>
+</body>
+</html>

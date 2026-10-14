@@ -1,0 +1,18 @@
+# Запуск: docker compose up -d --build   (из каталога main; рядом должен лежать файл .env)
+services:
+  calendar:
+    build: .
+    image: calendar
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DJANGO_DEBUG: "0"
+      # как часто забирать изменения из внешних календарей и досылать приглашения; 0 — не выполнять
+      SYNC_INTERVAL_MINUTES: "10"
+    ports:
+      - "8000:8000"
+    volumes:
+      - calendar-data:/data  # база db.sqlite3 и файлы событий (media)
+
+volumes:
+  calendar-data:
