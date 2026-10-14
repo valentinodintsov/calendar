@@ -25,6 +25,9 @@ db.sqlite3-journal
 # Загруженные пользователями файлы (вложения событий)
 media/
 
+# Каталог базы и файлов (DJANGO_DATA_DIR), том Docker
+data/
+
 # Собранная статика (python manage.py collectstatic)
 staticfiles/
 
@@ -43,6 +46,8 @@ settings_local.py
 !.env.example
 *.pem
 *.key
+*.p12
+*.pfx
 
 # ===== Тесты и покрытие =====
 .coverage
@@ -63,3 +68,8 @@ htmlcov/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Резервные копии draw.io
+*.drawio.bkp
+.$*.drawio
+.$*.drawio.bkp
