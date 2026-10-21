@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 """Django's command-line utility for administrative tasks."""
 
 import os

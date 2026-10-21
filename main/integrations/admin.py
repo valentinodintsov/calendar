@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 from django import forms
 from django.contrib import admin, messages
 from django.http import HttpResponseRedirect

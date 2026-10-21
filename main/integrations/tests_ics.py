@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 """Тесты модуля iCalendar. Не требуют Django и базы данных."""
 
 from datetime import datetime, timedelta, timezone

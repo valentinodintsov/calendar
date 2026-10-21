@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 """
 Простой EWS-сервер (Exchange Web Services) в памяти — для тестов адаптера Exchange без настоящего сервера.
 Поддерживает: GetFolder, FindFolder, FindItem (CalendarView), GetItem (Body), CreateItem, UpdateItem, DeleteItem;

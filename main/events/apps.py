@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 from django.apps import AppConfig
 
 

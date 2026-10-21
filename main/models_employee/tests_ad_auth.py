@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 from unittest import mock
 
 from django.contrib.auth import authenticate, get_user_model

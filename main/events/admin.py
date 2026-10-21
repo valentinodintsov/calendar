@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 from django.contrib import admin
 
 from models_employee.admin import RoleAdminMixin

@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 """
 Адаптер Microsoft Exchange (on-premises, 2010 SP2 и новее) через Exchange Web Services (EWS, SOAP).
 Вход — доменная учётная запись: NTLM (через requests_ntlm) или Basic, выбирается по ответу сервера.

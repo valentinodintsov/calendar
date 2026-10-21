@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 # Образ приложения «Календарь»: Django под gunicorn, статику отдаёт само приложение (whitenoise).
 # Сборка (из каталога main):  docker build -t calendar .
 # Запуск — см. docker-compose.yml и ADMIN_GUIDE.md, раздел «Запуск в Docker».

@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
 

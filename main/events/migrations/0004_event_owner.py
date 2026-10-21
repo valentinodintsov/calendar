@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models

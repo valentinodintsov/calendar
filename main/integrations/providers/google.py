@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 """
 Адаптер Google Calendar API v3 на requests (без google-api-python-client).
 Вход — OAuth 2.0: в базе хранится refresh-токен, access-токен обновляется автоматически.

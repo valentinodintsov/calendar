@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 from django.core.management.base import BaseCommand
 
 from directory.ldap_client import DirectoryError, diagnose, rank_entries

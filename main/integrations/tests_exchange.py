@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 """Тесты адаптера Exchange (EWS) против локального тестового EWS-сервера. Без Django."""
 
 from datetime import datetime, timedelta

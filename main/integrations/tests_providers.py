@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 """Тесты адаптеров CalDAV (против локального тестового сервера) и Google (с подменой HTTP). Без Django."""
 
 from datetime import datetime, timedelta, timezone

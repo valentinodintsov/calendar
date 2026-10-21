@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver

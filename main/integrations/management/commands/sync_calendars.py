@@ -1,3 +1,4 @@
+# © 2026 Одинцов Валентин Николаевич. Все права защищены.
 from django.core.management.base import BaseCommand
 
 from integrations.guests import deliver_pending
