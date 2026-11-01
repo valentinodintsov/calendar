@@ -58,6 +58,15 @@ def display_name(user):
     return user.get_full_name() or user.get_username()
 
 
+def short_name(user):
+    """«Иванов И.И.»: фамилия и инициалы (из имени и отчества, если они записаны в имени). Без фамилии — как есть."""
+    last = (user.last_name or "").strip()
+    initials = "".join(f"{part[0].upper()}." for part in (user.first_name or "").split() if part)
+    if last:
+        return f"{last} {initials}".strip()
+    return display_name(user)
+
+
 def _merge(a, b):
     return {k: bool(a.get(k)) or bool(b.get(k)) for k in ("read", "change")}
 
@@ -178,6 +187,30 @@ class Access:
     def can_create_for(self, owner):
         return owner is not None and self.creatable_owners().filter(pk=owner.pk).exists()
 
+    # ---- фильтр календарей ----
+    def calendars(self):
+        """
+        Календари, события которых пользователь видит целиком (свой и тех, кто дал ему чтение), — пункты фильтра.
+        Администратору, наблюдателю и менеджеру всех календарей — все календари, в которых есть события.
+        Свой календарь — первым, остальные по фамилии.
+        """
+        User = get_user_model()
+        if not self.is_authenticated:
+            return []
+        if self.is_admin or self.is_observer or self._read_all:
+            from events.models import Event
+
+            ids = set(Event.objects.exclude(owner=None).values_list("owner_id", flat=True).distinct())
+        else:
+            ids = {oid for oid, f in self._by_owner.items() if f["read"]}
+        if self.is_owner or self.is_admin:
+            ids.add(self.user.pk)
+        users = User.objects.filter(pk__in=ids).order_by("last_name", "first_name", "username")
+        mine = [u for u in users if u.pk == self.user.pk]
+        others = [u for u in users if u.pk != self.user.pk]
+        return [{"id": u.pk, "name": short_name(u), "full_name": display_name(u), "mine": u.pk == self.user.pk}
+                for u in mine + others]
+
     def me(self):
         """Данные о текущем пользователе для интерфейса."""
         owners = list(self.creatable_owners())
@@ -191,6 +224,7 @@ class Access:
             "can_manage_roles": self.can_manage_roles,
             "creatable_owners": [{"id": u.pk, "name": display_name(u)} for u in owners],
             "settings": get_preferences(self.user),
+            "calendars": self.calendars(),
         }
 
 

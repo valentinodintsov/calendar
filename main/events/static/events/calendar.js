@@ -78,7 +78,11 @@
   const VIEWS = ["month", "week", "day"];
   // Личные настройки пользователя (у каждого свои, хранятся на сервере): «Вид при открытии»,
   // а при «Последний» — вид, который этот пользователь выбрал в прошлый раз
-  const MY_SETTINGS = Object.assign({ theme: "system", start_view: "last", last_view: "month" }, ME.settings || {});
+  const MY_SETTINGS = Object.assign({ theme: "system", start_view: "last", last_view: "month", hidden_calendars: [] }, ME.settings || {});
+  // Фильтр календарей (левая панель): владельцы, чьи календари выключены. Их события не показываются;
+  // отчет по событиям сервер собирает с тем же фильтром (он хранится в личных настройках).
+  const hiddenCalendars = new Set(MY_SETTINGS.hidden_calendars || []);
+  const isShown = (ev) => !(ev.owner && hiddenCalendars.has(ev.owner.id));
   const savedView = MY_SETTINGS.start_view === "last" ? MY_SETTINGS.last_view : MY_SETTINGS.start_view;
   async function saveMySettings(changes) {
     Object.assign(MY_SETTINGS, changes);
@@ -123,6 +127,7 @@
   function indexByDay() {
     const map = new Map();
     for (const ev of state.events) {
+      if (!isShown(ev)) continue;
       const [s, e] = eventSpan(ev);
       for (let d = parseYmd(s), end = parseYmd(e); d <= end; d = addDays(d, 1)) {
         const key = ymd(d);
@@ -272,6 +277,7 @@
     if (isMonth) renderMonth();
     else renderTimeGrid();
     renderDayPanel();
+    syncPanelReport();
   }
 
   function renderMonth() {
@@ -839,9 +845,10 @@
         checkReminders();
       }
       const dn = describeDelivery(saved.delivery);
+      const hiddenNote = isShown(saved) ? "" : ` Календарь «${saved.owner.name}» выключен в фильтре — событие не показывается.`;
       dialog.close();
       toast(
-        (id ? "Событие обновлено." : "Событие создано.") + note + (dn.text ? " " + dn.text : ""),
+        (id ? "Событие обновлено." : "Событие создано.") + note + hiddenNote + (dn.text ? " " + dn.text : ""),
         note.includes("не отправлены") || dn.error,
         dn.text ? 9000 : 0
       );
@@ -1004,6 +1011,19 @@
   $("#new-event").addEventListener("click", () => openNew());
   $("#add-to-day").addEventListener("click", () => openNew(state.selected));
 
+  // ---------- calendar filter ----------
+  $("#calendar-filter").addEventListener("change", (e) => {
+    const box = e.target.closest("input[type=checkbox]");
+    if (!box) return;
+    const id = Number(box.value);
+    if (box.checked) hiddenCalendars.delete(id);
+    else hiddenCalendars.add(id);
+    saveMySettings({ hidden_calendars: [...hiddenCalendars].sort((a, b) => a - b) });
+    indexByDay();
+    render();
+    closeResults();
+  });
+
   // ---------- search ----------
   // Поиск событий: подсказки по мере ввода, выбор стрелками ↑/↓, Enter — открыть, Esc — закрыть.
   const search = $("#search");
@@ -1064,7 +1084,7 @@
     try {
       const data = await api(`${API}?q=${encodeURIComponent(q)}`);
       if (seq !== searchSeq) return; // ответ на устаревший запрос
-      found.items = data.events.slice(0, 30);
+      found.items = data.events.filter(isShown).slice(0, 30);
       renderResults();
     } catch (err) {
       toast(err.message, true);
@@ -2195,31 +2215,46 @@
   });
 
   // ---------- Отчёт по событиям (.docx) за выбранный период ----------
-  const reportStart = $("#report-start");
-  const reportEnd = $("#report-end");
-  const reportBtn = $("#report-btn");
-  const reportError = $("#report-error");
-  function showReportError(text) {
-    reportError.textContent = text;
-    reportError.hidden = !text;
+  // Два места: окно настроек и блок над фильтром календарей. Файл скачивает сам браузер: кнопка отправляет
+  // форму на /api/events/report/ (GET). Здесь — только период по умолчанию и его проверка.
+  function reportControls(prefix) {
+    const start = $(`#${prefix}-start`);
+    const end = $(`#${prefix}-end`);
+    const error = $(`#${prefix}-error`);
+    const showError = (text) => {
+      error.textContent = text;
+      error.hidden = !text;
+    };
+    // по умолчанию — месяц, открытый в календаре
+    const fill = () => {
+      const m = state.month;
+      start.value = ymd(new Date(m.getFullYear(), m.getMonth(), 1));
+      end.value = ymd(new Date(m.getFullYear(), m.getMonth() + 1, 0));
+      showError("");
+    };
+    $(`#${prefix}-btn`).addEventListener("click", (e) => {
+      let problem = "";
+      if (!start.value || !end.value) problem = "Укажите начало и окончание периода.";
+      else if (end.value < start.value) problem = "Окончание периода не может быть раньше начала.";
+      showError(problem);
+      if (problem) e.preventDefault();
+    });
+    return { start, end, fill };
   }
-  // по умолчанию — месяц, открытый в календаре
-  function fillReportPeriod() {
-    const m = state.month;
-    reportStart.value = ymd(new Date(m.getFullYear(), m.getMonth(), 1));
-    reportEnd.value = ymd(new Date(m.getFullYear(), m.getMonth() + 1, 0));
-    showReportError("");
+  const fillReportPeriod = reportControls("report").fill;
+
+  // В боковой панели период следует за открытым месяцем, пока пользователь не выбрал даты сам
+  const panelReport = reportControls("panel-report");
+  let panelReportTouched = false;
+  let panelReportMonth = "";
+  [panelReport.start, panelReport.end].forEach((el) => el.addEventListener("change", () => (panelReportTouched = true)));
+  function syncPanelReport() {
+    const key = ymd(state.month);
+    if (panelReportTouched || key === panelReportMonth) return;
+    panelReportMonth = key;
+    panelReport.fill();
   }
-  // Файл скачивает сам браузер: кнопка отправляет форму на /api/events/report/ (GET). Здесь — только проверка периода.
-  reportBtn.addEventListener("click", (e) => {
-    const start = reportStart.value;
-    const end = reportEnd.value;
-    let problem = "";
-    if (!start || !end) problem = "Укажите начало и окончание периода.";
-    else if (end < start) problem = "Окончание периода не может быть раньше начала.";
-    showReportError(problem);
-    if (problem) e.preventDefault();
-  });
+  syncPanelReport();
   // «Доступ» и «Интеграции» открываются из настроек: сначала закрываем окно настроек,
   // затем срабатывает обработчик самой кнопки (фаза перехвата идёт раньше)
   settingsDialog.addEventListener(

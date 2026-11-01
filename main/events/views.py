@@ -18,6 +18,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 from models_employee.permissions import Access, api_login_required, forbidden
+from models_employee.preferences import hidden_calendars
 
 from . import report
 from .forms import EventForm
@@ -226,7 +227,7 @@ def events_report(request):
     """
     GET /api/events/report/?start=YYYY-MM-DD&end=YYYY-MM-DD — файл «Отчет по событиям.docx»:
     все события, которые пользователь может читать (то же, что он видит в календаре), за период
-    с start по end включительно.
+    с start по end включительно — кроме событий календарей, выключенных в фильтре календарей.
     """
     start = _parse_date(request.GET.get("start"))
     end = _parse_date(request.GET.get("end"))
@@ -240,6 +241,9 @@ def events_report(request):
     if errors:
         return JsonResponse({"errors": errors}, status=400)
     events = _in_range(Access(request.user).filter_events(_events_qs()), start, end + timedelta(days=1))
+    hidden = hidden_calendars(request.user)
+    if hidden:  # календари, выключенные в фильтре, в отчет не идут
+        events = events.exclude(owner_id__in=hidden)
     response = HttpResponse(report.build_report(events, start, end, request.user), content_type=report.CONTENT_TYPE)
     response["Content-Disposition"] = content_disposition_header(True, report.FILENAME)
     response["Cache-Control"] = "no-store"
