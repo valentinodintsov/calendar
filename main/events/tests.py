@@ -1,3 +1,30 @@
+#################################################
+#
+#   Программа для ЭВМ «Календарь»
+#   (агрегатор событий в календарях пользователей)
+#
+#   © 2026 Одинцов Валентин Николаевич
+#   Все права защищены. All rights reserved.
+#
+#   Автор и правообладатель:
+#       Одинцов Валентин Николаевич
+#       e-mail: valentinka_santa@mail.ru
+#
+#   Год создания и первого выпуска: 2026
+#
+#   Программа охраняется законодательством
+#   Российской Федерации об авторском праве
+#   (часть четвёртая ГК РФ, ст. 1225, 1259, 1261).
+#   Знак охраны авторского права проставлен
+#   в соответствии со ст. 1271 ГК РФ.
+#
+#   Копирование, распространение, модификация,
+#   декомпиляция и иное использование программы
+#   или её частей без письменного разрешения
+#   правообладателя запрещены, если иное
+#   не предусмотрено законом.
+#
+#################################################
 import json
 import os
 import shutil
@@ -41,7 +68,7 @@ class CalendarPageTests(TestCase):
         resp = self.client.get(reverse("events:calendar"))
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'id="grid"')
-        self.assertContains(resp, "© Валентин Одинцов, 2026")
+        self.assertContains(resp, "© 2026 Валентин Одинцов")
         # адреса скрипта и стилей меняются вместе с файлами — браузер не оставит старый скрипт из кэша
         self.assertRegex(resp.content.decode(), r'events/calendar\.js\?v=[1-9]\d+"')
         self.assertRegex(resp.content.decode(), r'events/calendar\.css\?v=[1-9]\d+"')
@@ -241,6 +268,53 @@ class ApiErrorFormatTests(TestCase):
         self.assertIn("errors", resp.json())
 
 
+class CalendarFilterTests(TestCase):
+    """Левая панель «Фильтр календарей»: свой календарь и календари, к которым дали чтение, — «Фамилия И.О.»."""
+
+    def setUp(self):
+        User = get_user_model()
+        self.me = User.objects.create_user("sidorov", "s@example.com", "x", first_name="Сидор", last_name="Сидоров")
+        self.boss = User.objects.create_user("ivanov", "i@example.com", "x", first_name="Иван Иванович", last_name="Иванов")
+        self.writer = User.objects.create_user("petrov", "p@example.com", "x", first_name="Пётр", last_name="Петров")
+        self.stranger = User.objects.create_user("orlov", "o@example.com", "x", first_name="Олег", last_name="Орлов")
+
+    def test_list_and_names(self):
+        from models_employee.models import Delegation
+        from models_employee.permissions import Access
+
+        Delegation.objects.create(owner=self.boss, manager=self.me, can_read=True)
+        Delegation.objects.create(owner=self.writer, manager=self.me, can_create=True)  # без чтения — не в фильтре
+        cals = Access(self.me).calendars()
+        self.assertEqual([c["name"] for c in cals], ["Сидоров С.", "Иванов И.И."])
+        self.assertTrue(cals[0]["mine"])
+        self.client.force_login(self.me)
+        page = self.client.get(reverse("events:calendar"))
+        self.assertContains(page, "Фильтр календарей")
+        self.assertContains(page, f'<input type="checkbox" value="{self.boss.pk}" checked>', html=False)
+        self.assertNotContains(page, "Орлов")
+
+    def test_hidden_calendar_unchecked(self):
+        from models_employee.models import Delegation
+
+        Delegation.objects.create(owner=self.boss, manager=self.me, can_read=True)
+        self.client.force_login(self.me)
+        self.client.patch(reverse("models_employee:my-settings"), json.dumps({"hidden_calendars": [self.boss.pk]}),
+                          content_type="application/json")
+        page = self.client.get(reverse("events:calendar")).content.decode()
+        self.assertIn(f'<input type="checkbox" value="{self.boss.pk}">', page)
+        self.assertIn(f'<input type="checkbox" value="{self.me.pk}" checked>', page)
+
+    def test_admin_sees_calendars_with_events(self):
+        from models_employee.permissions import Access
+
+        admin = get_user_model().objects.create_superuser("root", "root@example.com", "x")
+        Event.objects.create(title="x", start=aware(2026, 10, 5, 9, 0), owner=self.stranger)
+        ids = [c["id"] for c in Access(admin).calendars()]
+        self.assertEqual(ids[0], admin.pk)
+        self.assertIn(self.stranger.pk, ids)
+        self.assertNotIn(self.boss.pk, ids)
+
+
 class ReportTests(TestCase):
     """GET /api/events/report/ — «Отчет по событиям.docx» за период."""
 
@@ -308,6 +382,23 @@ class ReportTests(TestCase):
         self.assertNotIn("Чужое", xml)
         self.client.force_login(get_user_model().objects.create_superuser("root", "root@example.com", "x"))
         self.assertIn("Чужое", self.document()[1])  # администратор видит все календари
+
+    def test_calendars_hidden_in_filter_are_not_in_report(self):
+        from models_employee.models import Delegation
+
+        Delegation.objects.create(owner=self.other, manager=self.owner, can_read=True)
+        self.event("Моё", aware(2026, 10, 5, 9, 0))
+        self.event("Петрова", aware(2026, 10, 5, 10, 0), owner=self.other)
+        _, xml = self.document()
+        self.assertIn("Моё", xml)
+        self.assertIn("Петрова", xml)  # по умолчанию все календари включены
+        resp = self.client.patch(reverse("models_employee:my-settings"), json.dumps({"hidden_calendars": [self.other.pk]}),
+                                 content_type="application/json")
+        self.assertEqual(resp.status_code, 200, resp.content)
+        _, xml = self.document()
+        self.assertIn("Моё", xml)
+        self.assertNotIn("Петрова", xml)
+        self.assertIn("Всего событий: 1", xml)
 
     def test_control_characters_do_not_break_document(self):
         self.event("Тема\x0bс мусором\x00", aware(2026, 10, 5, 9, 0), description="a\x1fb\r\nc")

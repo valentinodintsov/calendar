@@ -1,4 +1,32 @@
-{% load static %}<!doctype html>
+{% comment %}
+#################################################
+#
+#   Программа для ЭВМ «Календарь»
+#   (агрегатор событий в календарях пользователей)
+#
+#   © 2026 Одинцов Валентин Николаевич
+#   Все права защищены. All rights reserved.
+#
+#   Автор и правообладатель:
+#       Одинцов Валентин Николаевич
+#       e-mail: valentinka_santa@mail.ru
+#
+#   Год создания и первого выпуска: 2026
+#
+#   Программа охраняется законодательством
+#   Российской Федерации об авторском праве
+#   (часть четвёртая ГК РФ, ст. 1225, 1259, 1261).
+#   Знак охраны авторского права проставлен
+#   в соответствии со ст. 1271 ГК РФ.
+#
+#   Копирование, распространение, модификация,
+#   декомпиляция и иное использование программы
+#   или её частей без письменного разрешения
+#   правообладателя запрещены, если иное
+#   не предусмотрено законом.
+#
+#################################################
+{% endcomment %}{% load static %}<!doctype html>
 <html lang="ru"{% if me.settings.theme != "system" %} data-theme="{{ me.settings.theme }}"{% endif %}>
 <head>
   <meta charset="utf-8">
@@ -55,6 +83,38 @@
     </header>
 
     <main class="layout">
+      <aside class="day-panel side-panel" id="side-panel" aria-labelledby="side-panel-title">
+        <div class="day-panel-head">
+          <h2 class="day-date" id="side-panel-title">Фильтр календарей</h2>
+        </div>
+        {# Обычная отправка формы (GET): браузер сам скачивает файл. В отчет идут только отмеченные ниже календари #}
+        <form class="panel-report" id="panel-report" method="get" action="{% url 'events:events-report' %}" novalidate aria-labelledby="panel-report-title">
+          <div class="panel-report-title" id="panel-report-title">Отчет по событиям</div>
+          <div class="panel-report-row">
+            <div class="panel-report-dates">
+              <label class="field"><span>С</span><input type="date" id="panel-report-start" name="start" required></label>
+              <label class="field"><span>По</span><input type="date" id="panel-report-end" name="end" required></label>
+            </div>
+            <button type="submit" class="btn" id="panel-report-btn" title="Скачать «Отчет по событиям.docx» за выбранный период (только отмеченные календари)">Отчет</button>
+          </div>
+          <small class="error" id="panel-report-error" hidden></small>
+        </form>
+        {# Отмеченный календарь виден в календаре и попадает в отчет; снятая отметка скрывает его события и там, и там #}
+        <ul id="calendar-filter" class="cal-filter" aria-label="Показывать события календарей">
+          {% for cal in me.calendars %}
+          <li>
+            <label class="check cal-filter-item" title="{{ cal.full_name }}">
+              <input type="checkbox" value="{{ cal.id }}"{% if cal.id not in me.settings.hidden_calendars %} checked{% endif %}>
+              <span class="cal-filter-name">{{ cal.name }}</span>{% if cal.mine %}<span class="cal-filter-mine">мой</span>{% endif %}
+            </label>
+          </li>
+          {% empty %}
+          <li class="none">Нет подключенных календарей</li>
+          {% endfor %}
+        </ul>
+        <p class="hint">Снимите отметку, чтобы скрыть события календаря в календаре и в отчете по событиям.</p>
+      </aside>
+
       <section class="month" id="cal" aria-label="Календарь">
         <div id="month-view" class="month-view">
           <div class="weekdays">
@@ -77,7 +137,7 @@
         <p class="hint">Двойной клик по дню или часу — новое событие.<br>Событие можно перетащить на другой день или время.</p>
       </aside>
     </main>
-    <footer class="page-footer">© Валентин Одинцов, 2026</footer>
+    <footer class="page-footer">© 2026 Валентин Одинцов</footer>
   </div>
 
   <dialog id="event-dialog" class="dialog">
@@ -249,7 +309,7 @@
         <div class="report-row">
           <label class="field"><span>С</span><input type="date" id="report-start" name="start" required></label>
           <label class="field"><span>По</span><input type="date" id="report-end" name="end" required></label>
-          <button type="submit" class="btn" id="report-btn" formmethod="get" formaction="{% url 'events:events-report' %}" title="Скачать «Отчет по событиям.docx» — все события календаря за выбранный период">Отчет</button>
+          <button type="submit" class="btn" id="report-btn" formmethod="get" formaction="{% url 'events:events-report' %}" title="Скачать «Отчет по событиям.docx» — события календаря за выбранный период (без календарей, выключенных в фильтре)">Отчет</button>
         </div>
         <small class="error" id="report-error" hidden></small>
       </fieldset>

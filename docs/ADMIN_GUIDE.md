@@ -1,6 +1,6 @@
 # Календарь: инструкция администратора
 
-Документ для того, кто устанавливает, настраивает и сопровождает календарь. Работа пользователей описана в [USER_GUIDE.md](USER_GUIDE.md), API — в [API.md](API.md). Подробности по отдельным подсистемам: [INTEGRATIONS.md](INTEGRATIONS.md) (внешние календари и почта), [DIRECTORY.md](DIRECTORY.md) (адресная книга). Схема приложения — `shema.drawio` в корне репозитория.
+Документ для того, кто устанавливает, настраивает и сопровождает календарь. Работа пользователей описана в [USER_GUIDE.md](USER_GUIDE.md), API — в [API.md](API.md). Подробности по отдельным подсистемам: [INTEGRATIONS.md](INTEGRATIONS.md) (внешние календари и почта), [DIRECTORY.md](DIRECTORY.md) (адресная книга). Схема приложения — `shema.drawio` в этом же каталоге `docs/`.
 
 ## Содержание
 
@@ -89,6 +89,16 @@ docker run -d --name calendar --restart unless-stopped --env-file .env -e DJANGO
 - **Перенос существующей базы:** при остановленном контейнере скопируйте `db.sqlite3` и каталог `media` в том, владелец файлов — пользователь с uid 1000 (под ним работает приложение).
 - **Команды управления:** `docker compose exec calendar python manage.py <команда>` (например, `ad_auth_check`, `sync_calendars`).
 - **Обновление:** `git pull && docker compose up -d --build`. **Резервная копия:** `docker compose exec calendar python -c "import sqlite3; sqlite3.connect('/data/db.sqlite3').backup(sqlite3.connect('/data/backup.sqlite3'))"`, затем заберите `/data/backup.sqlite3` и `/data/media`.
+- **Обновление без доступа в интернет** (Docker Hub и PyPI закрыты). Обычная сборка скачивает базовый образ `python:3.12-slim` и пакеты и на таком сервере не проходит. Если набор пакетов (`requirements*.txt`) не менялся, соберите новый образ поверх работающего — заменяется только код и статика:
+
+  ```bash
+  docker tag calendar calendar:prev          # прежний образ — для отката
+  printf 'FROM calendar:prev\nUSER root\nCOPY . /app/\nRUN cd /app && python manage.py collectstatic --noinput && chmod +x docker-entrypoint.sh\nUSER calendar\n' > /tmp/Dockerfile.offline
+  DOCKER_BUILDKIT=0 docker build -f /tmp/Dockerfile.offline -t calendar /путь/к/коду
+  docker compose up -d --no-build calendar
+  ```
+
+  `DOCKER_BUILDKIT=0` нужен, чтобы сборка не обращалась к реестру образов. Откат: `docker tag calendar:prev calendar && docker compose up -d --no-build calendar`. Новые пакеты так не установить — для этого нужен доступ к PyPI или заранее скачанные пакеты.
 - Контейнер запускает один процесс gunicorn с несколькими потоками — не увеличивайте число процессов (`--workers`): блокировки отправки событий и кэш адресной книги живут в памяти процесса.
 
 ## 3. Настройки

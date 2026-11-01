@@ -1,3 +1,30 @@
+#################################################
+#
+#   Программа для ЭВМ «Календарь»
+#   (агрегатор событий в календарях пользователей)
+#
+#   © 2026 Одинцов Валентин Николаевич
+#   Все права защищены. All rights reserved.
+#
+#   Автор и правообладатель:
+#       Одинцов Валентин Николаевич
+#       e-mail: valentinka_santa@mail.ru
+#
+#   Год создания и первого выпуска: 2026
+#
+#   Программа охраняется законодательством
+#   Российской Федерации об авторском праве
+#   (часть четвёртая ГК РФ, ст. 1225, 1259, 1261).
+#   Знак охраны авторского права проставлен
+#   в соответствии со ст. 1271 ГК РФ.
+#
+#   Копирование, распространение, модификация,
+#   декомпиляция и иное использование программы
+#   или её частей без письменного разрешения
+#   правообладателя запрещены, если иное
+#   не предусмотрено законом.
+#
+#################################################
 """Личные настройки (шестерёнка): у каждого пользователя свои."""
 
 import json
@@ -20,7 +47,7 @@ class MySettingsTests(TestCase):
     def test_defaults(self):
         self.client.force_login(self.ivan)
         self.assertEqual(self.client.get(self.url).json()["settings"],
-                         {"theme": "system", "start_view": "last", "last_view": "month"})
+                         {"theme": "system", "start_view": "last", "last_view": "month", "hidden_calendars": []})
 
     def test_each_user_has_own_settings(self):
         self.client.force_login(self.ivan)
@@ -28,7 +55,7 @@ class MySettingsTests(TestCase):
         self.assertEqual(resp.status_code, 200, resp.content)
         self.patch({"last_view": "day"})
         self.assertEqual(self.client.get(self.url).json()["settings"],
-                         {"theme": "dark", "start_view": "week", "last_view": "day"})
+                         {"theme": "dark", "start_view": "week", "last_view": "day", "hidden_calendars": []})
 
         self.client.force_login(self.anna)  # у Анны — свои, нетронутые
         self.assertEqual(self.client.get(self.url).json()["settings"]["theme"], "system")
@@ -52,3 +79,13 @@ class MySettingsTests(TestCase):
         self.assertEqual(self.client.get(self.url).json()["settings"]["theme"], "system")
         self.client.logout()
         self.assertEqual(self.client.get(self.url).status_code, 401)
+
+    def test_hidden_calendars(self):
+        self.client.force_login(self.ivan)
+        resp = self.patch({"hidden_calendars": [self.anna.pk, self.anna.pk, 99]})
+        self.assertEqual(resp.status_code, 200, resp.content)
+        self.assertEqual(resp.json()["settings"]["hidden_calendars"], sorted({self.anna.pk, 99}))
+        for bad in ("1,2", [1, "2"], [True], [-1], None):
+            self.assertEqual(self.patch({"hidden_calendars": bad}).status_code, 400, bad)
+        self.assertEqual(self.client.get(self.url).json()["settings"]["hidden_calendars"], sorted({self.anna.pk, 99}))
+        self.assertEqual(self.patch({"hidden_calendars": []}).json()["settings"]["hidden_calendars"], [])

@@ -1,3 +1,32 @@
+/*
+#################################################
+#
+#   Программа для ЭВМ «Календарь»
+#   (агрегатор событий в календарях пользователей)
+#
+#   © 2026 Одинцов Валентин Николаевич
+#   Все права защищены. All rights reserved.
+#
+#   Автор и правообладатель:
+#       Одинцов Валентин Николаевич
+#       e-mail: valentinka_santa@mail.ru
+#
+#   Год создания и первого выпуска: 2026
+#
+#   Программа охраняется законодательством
+#   Российской Федерации об авторском праве
+#   (часть четвёртая ГК РФ, ст. 1225, 1259, 1261).
+#   Знак охраны авторского права проставлен
+#   в соответствии со ст. 1271 ГК РФ.
+#
+#   Копирование, распространение, модификация,
+#   декомпиляция и иное использование программы
+#   или её частей без письменного разрешения
+#   правообладателя запрещены, если иное
+#   не предусмотрено законом.
+#
+#################################################
+*/
 :root {
   --bg: #f6f3ee;
   --surface: #fffdf9;
@@ -136,7 +165,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.app { max-width: 1400px; margin: 0 auto; padding: 20px 24px 24px; min-height: 100%; display: flex; flex-direction: column; }
+.app { max-width: 1760px; margin: 0 auto; padding: 20px 12px 24px; min-height: 100%; display: flex; flex-direction: column; }
 
 /* ---------- Top bar ---------- */
 .topbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -165,6 +194,8 @@ body {
 .btn.primary:hover { filter: brightness(1.08); }
 .btn.danger { color: var(--c-red); }
 .btn[disabled] { opacity: .6; cursor: progress; }
+/* «+ Добавить» и «Отчет»: при наведении рамка цвета кнопки «+ Событие» */
+#add-to-day:hover, #panel-report-btn:hover { border-color: var(--accent); }
 
 .search { position: relative; }
 .search input {
@@ -185,7 +216,7 @@ body {
 
 /* ---------- Layout ---------- */
 .page-footer { margin-top: 16px; text-align: center; font-size: 12px; color: var(--ink-2); }
-.layout { flex: 1; display: grid; grid-template-columns: 1fr 300px; gap: 16px; min-height: 0; }
+.layout { flex: 1; display: grid; grid-template-columns: 300px 1fr 300px; gap: 16px; min-height: 0; }
 
 .month { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--shadow); }
 .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid var(--line); }
@@ -199,6 +230,14 @@ body {
   transition: background .12s;
 }
 .cell:nth-child(7n) { border-right: 0; }
+/* День под курсором: рамка цвета кнопки «Отчет» при наведении (--accent). У ячеек общие линии сетки
+   (своя правая и нижняя, верхняя и левая — от соседей), поэтому рамка — отдельный слой поверх всех четырёх линий */
+.cell::after, .tg-col::after {
+  content: ""; position: absolute; inset: -1px 0 0 -1px; border: 1px solid var(--accent);
+  pointer-events: none; z-index: 1; opacity: 0; transition: opacity .12s;
+}
+.tg-col::after { inset: 0 -1px 0 -1px; }
+.cell:hover::after, .tg-col:hover::after { opacity: 1; }
 .cell:hover { background: color-mix(in srgb, var(--surface-2) 55%, transparent); }
 /* дни прошлого и следующего месяца — серый фон ячейки, тёмный текст для читаемости */
 .cell.other,
@@ -234,6 +273,22 @@ body {
 .day-panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 14px; }
 .day-weekday { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); font-weight: 600; }
 .day-date { font: 600 24px/1.15 var(--display); }
+.side-panel h2 { margin: 0; }
+.panel-report { display: flex; flex-direction: column; gap: 8px; padding-bottom: 14px; margin-bottom: 10px; border-bottom: 1px solid var(--line); }
+.panel-report-title { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); font-weight: 600; }
+.panel-report-row { display: flex; align-items: stretch; gap: 10px; }
+.panel-report-dates { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.panel-report-dates .field { flex-direction: row; align-items: center; gap: 8px; }
+.panel-report-dates .field > span { width: 22px; flex: none; }
+.panel-report-dates input { flex: 1; min-width: 0; width: 100%; }
+.panel-report-row .btn { flex: none; height: auto; } /* по высоте — от верха поля «С» до низа поля «По» */
+.cal-filter { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; overflow: auto; flex: 1; }
+.cal-filter-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; cursor: pointer; margin: 0; }
+.cal-filter-item:hover { background: var(--surface-2); }
+.cal-filter-item input { flex: none; margin: 0; }
+.cal-filter-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-filter-mine { margin-left: auto; font-size: 11px; color: var(--ink-3); }
+.cal-filter .none { color: var(--ink-2); font-size: 13px; border: 1px dashed var(--line); border-radius: 10px; padding: 10px; text-align: center; }
 .day-events { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; overflow: auto; flex: 1; }
 .day-events li {
   display: flex; gap: 10px; padding: 10px 12px; border-radius: var(--radius); background: var(--surface-2); cursor: pointer;
@@ -321,10 +376,15 @@ body {
 .toast.error { background: var(--c-red); color: #fff; }
 
 /* ---------- Responsive ---------- */
+@media (max-width: 1280px) {
+  .layout { grid-template-columns: 240px 1fr 260px; }
+}
 @media (max-width: 980px) {
   .layout { grid-template-columns: 1fr; }
   .day-panel { order: -1; }
+  .side-panel { order: 1; } /* на узком экране левый блок уходит под календарь */
   .day-events { max-height: 260px; }
+  .cal-filter { max-height: 260px; }
 }
 @media (max-width: 640px) {
   .app { padding: 12px; }
