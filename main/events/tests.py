@@ -68,7 +68,7 @@ class CalendarPageTests(TestCase):
         resp = self.client.get(reverse("events:calendar"))
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'id="grid"')
-        self.assertContains(resp, "© Валентин Одинцов, 2026")
+        self.assertContains(resp, "© 2026 Валентин Одинцов")
         # адреса скрипта и стилей меняются вместе с файлами — браузер не оставит старый скрипт из кэша
         self.assertRegex(resp.content.decode(), r'events/calendar\.js\?v=[1-9]\d+"')
         self.assertRegex(resp.content.decode(), r'events/calendar\.css\?v=[1-9]\d+"')
