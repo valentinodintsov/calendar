@@ -1,0 +1,163 @@
+<mxfile host="app.diagrams.net" agent="calendar">
+  <diagram id="app-schema" name="Схема приложения">
+    <mxGraphModel dx="379" dy="216" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1440" pageHeight="1040" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c2" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=20;fontStyle=1;fontFamily=Helvetica;" value="Календарь — схема приложения" vertex="1">
+          <mxGeometry height="40" width="600" x="40" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="c3" parent="1" style="shape=umlActor;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;html=1;fontFamily=Helvetica;fontSize=12;" value="Сотрудник (браузер)" vertex="1">
+          <mxGeometry height="64" width="36" x="310" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" parent="1" style="shape=umlActor;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;spacingLeft=8;html=1;fontFamily=Helvetica;fontSize=12;" value="Администратор (браузер)" vertex="1">
+          <mxGeometry height="64" width="36" x="772" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;b&gt;Страница входа&lt;/b&gt;&lt;br&gt;/accounts/login/&lt;br&gt;доменные логин и пароль" vertex="1">
+          <mxGeometry height="110" width="260" x="40" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;b&gt;Страница календаря  /&lt;/b&gt;&lt;br&gt;calendar.html · calendar.js · calendar.css&lt;br&gt;слева — фильтр календарей и отчёт .docx&lt;br&gt;месяц / неделя / день, панель дня, поиск,&lt;br&gt;форма события, контакты, напоминания,&lt;br&gt;настройки: доступ, интеграции, отчёт .docx" vertex="1">
+          <mxGeometry height="110" width="260" x="350" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="c7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;b&gt;Админка Django  /admin/&lt;/b&gt;&lt;br&gt;роли сотрудников, каталоги AD / LDAP,&lt;br&gt;почтовый сервер, внешние календари" vertex="1">
+          <mxGeometry height="110" width="260" x="660" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" edge="1" parent="1" source="c3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="c5" value="вход">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="328" y="190" />
+              <mxPoint x="170" y="190" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c9" edge="1" parent="1" source="c3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="c6" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="328" y="190" />
+              <mxPoint x="480" y="190" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c10" edge="1" parent="1" source="c4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="c7" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;verticalAlign=top;align=left;spacing=10;fontStyle=1;fontSize=14;arcSize=2;fontFamily=Helvetica;" value="Django-приложение  (проект main · Python 3.11 · Django 5.2)" vertex="1">
+          <mxGeometry height="615" width="920" x="20" y="385" as="geometry" />
+        </mxCell>
+        <mxCell id="c12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;models_employee — пользователи и права&lt;/b&gt;&lt;br&gt;ad_auth.py — вход через домен, создание и обновление пользователя&lt;br&gt;permissions.py — роли: владелец, менеджер, наблюдатель, администратор&lt;br&gt;Delegation — делегирование прав&lt;br&gt;preferences.py — личные настройки и фильтр календарей&lt;br&gt;API: /api/delegations/, /api/me/settings/" vertex="1">
+          <mxGeometry height="190" width="260" x="40" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="c13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;events — события&lt;/b&gt;&lt;br&gt;Event, Attachment (файлы до 20 МБ)&lt;br&gt;views.py — список, поиск, создание, изменение, перенос, удаление&lt;br&gt;report.py — «Отчет по событиям.docx» без выключенных календарей&lt;br&gt;API: /api/events/, /api/events/report/, /api/attachments/, /api/reminders/" vertex="1">
+          <mxGeometry height="190" width="260" x="350" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="c14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;integrations — внешние календари, почта&lt;/b&gt;&lt;br&gt;sync.py — двусторонняя синхронизация&lt;br&gt;push.py — отправка при сохранении события&lt;br&gt;providers/: exchange, caldav, google&lt;br&gt;invitations.py, ics.py, mailer.py — приглашения с файлом .ics&lt;br&gt;API: /api/integrations/, /api/events/&amp;lt;id&amp;gt;/invite/" vertex="1">
+          <mxGeometry height="190" width="260" x="660" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="c15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;b&gt;main — проект&lt;/b&gt;&lt;br&gt;settings.py — настройки (+ .env, local_settings.py)&lt;br&gt;urls.py — админка, вход / выход, адреса приложений" vertex="1">
+          <mxGeometry height="140" width="260" x="40" y="695" as="geometry" />
+        </mxCell>
+        <mxCell id="c16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;b&gt;Команды manage.py (вручную / cron)&lt;/b&gt;&lt;br&gt;sync_calendars — синхронизация календарей&lt;br&gt;ad_auth_check, directory_check, exchange_check — проверка подключений" vertex="1">
+          <mxGeometry height="140" width="260" x="350" y="695" as="geometry" />
+        </mxCell>
+        <mxCell id="c17" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;directory — адресная книга&lt;/b&gt;&lt;br&gt;ldap_client.py — подключение (ldap3), поиск на сервере каталога&lt;br&gt;search.py — ранжирование контактов&lt;br&gt;DirectorySource — настройки каталогов&lt;br&gt;API: /api/contacts/" vertex="1">
+          <mxGeometry height="140" width="260" x="660" y="695" as="geometry" />
+        </mxCell>
+        <mxCell id="c18" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;" value="&lt;b&gt;SQLite — db.sqlite3&lt;/b&gt;&lt;br&gt;пользователи, права, события, вложения, внешние календари, каталоги&lt;br&gt;(пароли интеграций зашифрованы)" vertex="1">
+          <mxGeometry height="95" width="260" x="40" y="885" as="geometry" />
+        </mxCell>
+        <mxCell id="c19" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;" value="&lt;b&gt;media/&lt;/b&gt;&lt;br&gt;файлы вложений событий" vertex="1">
+          <mxGeometry height="95" width="260" x="350" y="885" as="geometry" />
+        </mxCell>
+        <mxCell id="c20" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;" value="&lt;b&gt;.env · local_settings.py&lt;/b&gt;&lt;br&gt;домен, серверы, списки ролей, ключи" vertex="1">
+          <mxGeometry height="95" width="260" x="660" y="885" as="geometry" />
+        </mxCell>
+        <mxCell id="c21" edge="1" parent="1" source="c5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="c12" value="проверка пароля">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c22" edge="1" parent="1" source="c6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="c13" value="REST API (JSON)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c23" edge="1" parent="1" source="c7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;dashed=1;" target="c14" value="настройка">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c24" edge="1" parent="1" source="c13" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c12" value="права">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c25" edge="1" parent="1" source="c13" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c14" value="сигналы">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c26" edge="1" parent="1" source="c13" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=0.8;exitY=1;exitDx=0;exitDy=0;entryX=0.3;entryY=0;entryDx=0;entryDy=0;" target="c17" value="участники из каталога">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="558" y="658" />
+              <mxPoint x="738" y="658" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c27" edge="1" parent="1" source="c16" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=0.95;exitY=0;exitDx=0;exitDy=0;entryX=0.1;entryY=1;entryDx=0;entryDy=0;dashed=1;" target="c14" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="597" y="676" />
+              <mxPoint x="686" y="676" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c28" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;verticalAlign=top;align=left;spacing=10;fontStyle=1;fontSize=14;arcSize=2;fontFamily=Helvetica;" value="Внешние системы" vertex="1">
+          <mxGeometry height="805" width="330" x="1070" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="c29" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;b&gt;Microsoft Exchange (EWS)&lt;/b&gt;&lt;br&gt;https://&amp;lt;domain_name&amp;gt;/EWS/Exchange.asmx&lt;br&gt;календари Outlook, приглашения участникам" vertex="1">
+          <mxGeometry height="90" width="290" x="1090" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="c30" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;b&gt;CalDAV-календари&lt;/b&gt;&lt;br&gt;&amp;lt;domain_name&amp;gt;/CalDAV, Яндекс, Mail.ru, Рамблер, любой сервер CalDAV" vertex="1">
+          <mxGeometry height="80" width="290" x="1090" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="c31" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;b&gt;Google Calendar&lt;/b&gt;&lt;br&gt;OAuth 2.0 + Calendar API" vertex="1">
+          <mxGeometry height="60" width="290" x="1090" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="c32" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;b&gt;Почтовый сервер (SMTP)&lt;/b&gt;&lt;br&gt;&amp;lt;domain_name&amp;gt; : 587, StartTLS&lt;br&gt;письма-приглашения с .ics" vertex="1">
+          <mxGeometry height="80" width="290" x="1090" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="c33" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;arcSize=6;fontFamily=Helvetica;fontSize=12;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;b&gt;email.yanao.ru : 636 (LDAPS)&lt;/b&gt;&lt;br&gt;LDAP-сервер, за ним каталог Active Directory (cn=&amp;lt;domain_name&amp;gt;)&lt;br&gt;• проверка логина и пароля&lt;br&gt;• данные учётной записи (objectGUID)&lt;br&gt;• поиск контактов адресной книги" vertex="1">
+          <mxGeometry height="140" width="290" x="1090" y="695" as="geometry" />
+        </mxCell>
+        <mxCell id="c34" parent="1" style="text;html=1;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#555555;fontFamily=Helvetica;" value="Все подключения устанавливает сервер календаря.&lt;br&gt;Пароль домена в базе не хранится: его проверяет LDAP-сервер при каждом входе." vertex="1">
+          <mxGeometry height="80" width="290" x="1090" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="c35" edge="1" parent="1" source="c14" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=1;exitY=0.105;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=block;startFill=1;" target="c29" value="события">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="980" y="450" />
+              <mxPoint x="980" y="285" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c36" edge="1" parent="1" source="c14" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=1;exitY=0.253;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=block;startFill=1;" target="c30" value="события">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1025" y="478" />
+              <mxPoint x="1025" y="390" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c37" edge="1" parent="1" source="c14" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=1;exitY=0.411;exitDx=0;exitDy=0;entryX=0;entryY=0.967;entryDx=0;entryDy=0;startArrow=block;startFill=1;" target="c31" value="события">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c38" edge="1" parent="1" source="c14" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=1;exitY=0.737;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c32" value="приглашения">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c39" edge="1" parent="1" source="c12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=0.85;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" target="c33" value="вход: LDAP-bind от имени пользователя">
+          <mxGeometry relative="1" x="-0.62" as="geometry">
+            <Array as="points">
+              <mxPoint x="261" y="638" />
+              <mxPoint x="1000" y="638" />
+              <mxPoint x="1000" y="730" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c40" edge="1" parent="1" source="c17" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Helvetica;labelBackgroundColor=#ffffff;exitX=1;exitY=0.679;exitDx=0;exitDy=0;entryX=0;entryY=0.679;entryDx=0;entryDy=0;" target="c33" value="поиск контактов">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
