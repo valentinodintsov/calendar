@@ -26,6 +26,8 @@ db.sqlite3-journal
 # Загруженные пользователями файлы (вложения событий)
 media/
 Право/
+docs/DOCKER_ZS_INT.md
+docs/docker.zs.int - инструкция администратора.pdf
 
 # Каталог базы и файлов (DJANGO_DATA_DIR), том Docker
 data/

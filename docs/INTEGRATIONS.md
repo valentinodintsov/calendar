@@ -118,7 +118,7 @@ export GOOGLE_OAUTH_CLIENT_SECRET="..."
 Подключение идёт через Exchange Web Services (EWS) — так же работает Outlook на Mac и мобильные клиенты.
 
 - Адрес по умолчанию: `INTEGRATIONS_EXCHANGE_URL` (`https://email.yanao.ru/EWS/Exchange.asmx`). При подключении его можно изменить; достаточно ввести имя сервера — путь `/EWS/Exchange.asmx` добавится сам.
-- Логин: `YG\ivanov`, `ivanov@yanao.ru` или `ivanov@yg.loc` — как для входа в OWA.
+- Логин: `YG\ivanov`, `ivanov@yanao.ru` или `ivanov@domain.ru` — как для входа в OWA.
 - Способ входа (NTLM или Basic) определяется по ответу сервера. Для NTLM нужен пакет `requests_ntlm` (есть в `requirements.txt`).
 - Поддерживается Exchange 2010 SP2 и новее.
 - Ссылка события хранится в Exchange **в открытом виде** — в тексте события после описания, через пустую строку:

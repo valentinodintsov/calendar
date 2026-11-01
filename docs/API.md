@@ -28,7 +28,7 @@ JSON API, через которое работает веб-интерфейс �
 
 API использует сессию Django (cookie `sessionid`), как и интерфейс. Отдельных ключей и токенов API нет: запросы выполняются от имени вошедшего пользователя и с его правами.
 
-Учётная запись — доменная (`ivanov` или `ivanov@yanao.ru` и пароль домена); локальный пароль действует только у суперпользователя. Каждый вход проверяется на сервере домена, а неудачные попытки учитываются его политикой блокировки — в скриптах входите один раз и переиспользуйте cookie, а не входите перед каждым запросом. Сессия действует до выхода или две недели.
+Учётная запись — доменная (`ivanov` или `ivanov@domain.ru` и пароль домена); локальный пароль действует только у суперпользователя. Каждый вход проверяется на сервере домена, а неудачные попытки учитываются его политикой блокировки — в скриптах входите один раз и переиспользуйте cookie, а не входите перед каждым запросом. Сессия действует до выхода или две недели.
 
 1. Войти: `POST /accounts/login/` (обычная HTML-форма Django с полями `username`, `password`, `csrfmiddlewaretoken`). Успех — перенаправление `302`; ответ `200` означает, что войти не удалось (страница входа с сообщением об ошибке).
 2. Для запросов, которые меняют данные (`POST`, `PUT`, `PATCH`, `DELETE`), передавать CSRF-токен:
@@ -47,7 +47,7 @@ CSRF=$(awk '$6=="csrftoken"{print $7}' jar.txt)
 # 2) войти
 curl -s -b jar.txt -c jar.txt -X POST "$BASE/accounts/login/" \
      -H "Referer: $BASE/accounts/login/" \
-     --data-urlencode "username=ivanov@yanao.ru" --data-urlencode "password=секрет" \
+     --data-urlencode "username=ivanov@domain.ru" --data-urlencode "password=секрет" \
      --data-urlencode "csrfmiddlewaretoken=$CSRF" > /dev/null
 CSRF=$(awk '$6=="csrftoken"{print $7}' jar.txt)   # токен обновляется после входа
 
@@ -68,7 +68,7 @@ BASE = "http://127.0.0.1:8000"
 s = requests.Session()
 s.get(f"{BASE}/accounts/login/")
 s.post(f"{BASE}/accounts/login/",
-       data={"username": "ivanov@yanao.ru", "password": "секрет", "csrfmiddlewaretoken": s.cookies["csrftoken"]},
+       data={"username": "ivanov@domain.ru", "password": "секрет", "csrfmiddlewaretoken": s.cookies["csrftoken"]},
        headers={"Referer": f"{BASE}/accounts/login/"})
 assert "sessionid" in s.cookies, "войти не удалось"
 s.headers["X-CSRFToken"] = s.cookies["csrftoken"]
@@ -151,16 +151,16 @@ created = s.post(f"{BASE}/api/events/", json={"title": "Планёрка",
   "description": "Повестка во вложении",
   "location": "Переговорная 1",
   "url": "https://meet.example.com/abc",
-  "guest_emails": ["petr@rambler.ru", "sidorova@yanao.ru"],
-  "directory_guests": ["sidorova@yanao.ru"],
-  "participant_names": {"sidorova@yanao.ru": "Сидорова Мария"},
+  "guest_emails": ["petr@rambler.ru", "sidorova@domain.ru"],
+  "directory_guests": ["sidorova@domain.ru"],
+  "participant_names": {"sidorova@domain.ru": "Сидорова Мария"},
   "reminder_minutes": 15,
   "start": "2026-10-12T10:00",
   "end": "2026-10-12T11:30",
   "all_day": false,
   "color": "blue",
   "owner": {"id": 3, "name": "Иван Петров"},
-  "invitees": [{"id": 5, "name": "Анна Петрова", "email": "apetrova@yanao.ru"}],
+  "invitees": [{"id": 5, "name": "Анна Петрова", "email": "apetrova@domain.ru"}],
   "attachments": [
     {"id": 7, "name": "повестка.pdf", "size": 183204, "url": "/api/attachments/7/download/"}
   ],
@@ -548,7 +548,7 @@ GET /api/integrations/
 POST /api/integrations/discover/
 ```
 
-Exchange: `{"provider": "exchange", "server_url": "https://email.yanao.ru/EWS/Exchange.asmx", "username": "YG\\ivanov", "password": "..."}` — `id` основного календаря `calendar`.
+Exchange: `{"provider": "exchange", "server_url": "https://email.domain.ru/EWS/Exchange.asmx", "username": "YG\\ivanov", "password": "..."}` — `id` основного календаря `calendar`.
 
 CalDAV: `{"provider": "yandex", "server_url": "https://caldav.yandex.ru", "username": "ivan@yandex.ru", "password": "пароль приложения"}`
 (`server_url` можно не передавать — подставится адрес по умолчанию). Google: `{"provider": "google"}` после входа через Google.
@@ -661,7 +661,7 @@ GET /api/contacts/?q=текст&limit=20
   "query": "петров", "total": 2,
   "results": [{
     "id": "1:6f1c…", "name": "Петров Иван Сергеевич", "last_name": "Петров", "first_name": "Иван", "middle_name": "Сергеевич",
-    "email": "i.petrov@yanao.ru", "phone": "+7 (34922) 4-12-34", "mobile": "",
+    "email": "i.petrov@domain.ru", "phone": "+7 (34922) 4-12-34", "mobile": "",
     "title": "Начальник отдела", "department": "Отдел ИТ", "company": "", "office": "305",
     "source": "YG", "user_id": 4, "exact": true
   }],
@@ -688,7 +688,7 @@ POST /api/directory/sources/<id>/test/    — проверить подключ�
 
 ```json
 {"ok": true, "message": "Подключение успешно. Найдено записей (первые): 5.", "found": 5,
- "samples": [{"dn": "uid=ipetrov,cn=yg.loc", "name": "Петров Иван", "email": "i.petrov@yanao.ru"}],
+ "samples": [{"dn": "uid=ipetrov,cn=domain.ru", "name": "Петров Иван", "email": "i.petrov@domain.ru"}],
  "attributes": ["cn", "displayName", "givenName", "mail", "sn", "telephoneNumber"]}
 ```
 
