@@ -9,6 +9,7 @@ venv/
 .venv/
 env/
 ENV/
+Право/
 
 # Сборка / пакеты
 build/
@@ -24,6 +25,7 @@ db.sqlite3-journal
 
 # Загруженные пользователями файлы (вложения событий)
 media/
+Право/
 
 # Каталог базы и файлов (DJANGO_DATA_DIR), том Docker
 data/
